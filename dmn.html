@@ -40,7 +40,7 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="规则表">
+                <el-form-item label="DMN">
                     <div>
                         <el-tabs tab-position="top" v-model="dmnEditorName" @tab-click="dmnEditorTabClick">
                             <el-tab-pane v-for="(v,index) in dmnEditorTabs" :key="index" :name="index.toString()">
@@ -50,6 +50,9 @@
                         <div class="dmn-container" ref="dmn-container"></div>
                     </div>
                 </el-form-item>
+                <el-form-item label="XML">
+                    <el-input type="textarea" readonly v-model="item.dmnXML" rows="25"></el-input>
+                  </el-form-item>
             </el-form>
         </el-row>
     </div>
