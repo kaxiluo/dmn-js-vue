@@ -13,19 +13,14 @@
     <link rel="stylesheet" href="https://unpkg.com/dmn-js@13.0.0/dist/assets/dmn-js-decision-table-controls.css">
     <link rel="stylesheet" href="https://unpkg.com/dmn-js@13.0.0/dist/assets/dmn-js-literal-expression.css">
     <link rel="stylesheet" href="https://unpkg.com/dmn-js@13.0.0/dist/assets/dmn-font/css/dmn.css">
-    <!-- element-ui css -->
-    <link rel="stylesheet" href="//unpkg.com/element-ui@2.15.7/lib/theme-chalk/index.css">
-
-    <!-- dmnjs modeler -->
-    <script src="https://unpkg.com/dmn-js@13.0.0/dist/dmn-modeler.development.js"></script>
 
     <!-- vue 2.6.14-->
     <script src="//unpkg.com/vue@2.6.14/dist/vue.js"></script>
+
+    <!-- element-ui css -->
+    <link rel="stylesheet" href="//unpkg.com/element-ui@2.15.7/lib/theme-chalk/index.css">
     <!-- element-ui js -->
     <script src="//unpkg.com/element-ui@2.15.7/lib/index.js"></script>
-
-    <!-- dmn xml generate -->
-    <script src="./dmn-xml.js"></script>
 </head>
 
 <body>
@@ -52,10 +47,16 @@
                 </el-form-item>
                 <el-form-item label="XML">
                     <el-input type="textarea" readonly v-model="item.dmnXML" rows="25"></el-input>
-                  </el-form-item>
+                </el-form-item>
             </el-form>
         </el-row>
     </div>
+
+    <!-- dmnjs modeler -->
+    <script src="https://unpkg.com/dmn-js@13.0.0/dist/dmn-modeler.development.js"></script>
+
+    <!-- dmn xml generate -->
+    <script src="./dmn-xml.js"></script>
 
     <script>
         const dmnModeler = new DmnJS({
@@ -106,27 +107,27 @@
                 },
             },
             mounted: function () {
-                    let _this = this
-                    dmnModeler.on('views.changed', function (event) {
-                        const { views, activeView } = event;
+                let _this = this
+                dmnModeler.on('views.changed', function (event) {
+                    const { views, activeView } = event;
 
-                        // 给每个视图创建一个tab
-                        let dmnEditorTabs = []
-                        views.forEach(function (v, idx) {
-                            v.className = CLASS_NAMES[v.type]
-                            if (v === activeView) {
-                                _this.dmnEditorName = idx.toString()
-                            }
-                            dmnEditorTabs.push(v)
-                        });
-                        _this.dmnEditorTabs = dmnEditorTabs
-
-                        // 每次修改DMN立即更新this.item.dmnXML
-                        _this.exportDmnXml();
+                    // 给每个视图创建一个tab
+                    let dmnEditorTabs = []
+                    views.forEach(function (v, idx) {
+                        v.className = CLASS_NAMES[v.type]
+                        if (v === activeView) {
+                            _this.dmnEditorName = idx.toString()
+                        }
+                        dmnEditorTabs.push(v)
                     });
+                    _this.dmnEditorTabs = dmnEditorTabs
 
-                    this.initDmn()
-                },
+                    // 每次修改DMN立即更新this.item.dmnXML
+                    _this.exportDmnXml();
+                });
+
+                this.initDmn()
+            },
             methods: {
                 initDmn() {
                     dmnModeler.attachTo('.dmn-container')
@@ -175,7 +176,7 @@
                 async exportDmnXml() {
                     try {
                         const { xml } = await dmnModeler.saveXML({ format: true })
-                        console.log('exportDmnDiagram', xml)
+                        //console.log('exportDmnXml', xml)
                         this.item.dmnXML = xml
                     } catch (err) {
                         console.error('could not save DMN 1.3 diagram', err);
