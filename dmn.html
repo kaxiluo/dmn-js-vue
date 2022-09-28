@@ -102,8 +102,7 @@
                     return data;
                 },
             },
-            methods: {
-                mounted: function () {
+            mounted: function () {
                     let _this = this
                     dmnModeler.on('views.changed', function (event) {
                         const { views, activeView } = event;
@@ -123,9 +122,10 @@
                         _this.exportDmnXml();
                     });
 
-                    this.init()
+                    this.initDmn()
                 },
-                init() {
+            methods: {
+                initDmn() {
                     dmnModeler.attachTo('.dmn-container')
 
                     if (!this.item.dmnXML) {
@@ -137,7 +137,6 @@
                     this.openDmnView(0)
                 },
                 attributeChange() {
-                    return;
                     let newXml = DmnXml.getXmlByAttributes(this.item.dmnXML, this.selectedAttributes)
                     this.item.dmnXML = newXml
                     this.openDmnDiagram(newXml)

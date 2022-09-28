@@ -27,6 +27,8 @@ class DmnXmlTemplate {
 
     static ShapeWidth = 180
 
+    static DefaultOutputLabel = '得分'
+
     static getXml(oldXml, attributes) {
         if (attributes.length === 0) {
             return DmnXml.getEmptyXml()
@@ -147,7 +149,7 @@ class DmnXmlTemplate {
         inputExpression.appendChild(text) // text
         let output = xmlDoc.createElement('output')
         output.setAttribute('id', "Output_" + code)
-        output.setAttribute('label', "得分")
+        output.setAttribute('label', this.DefaultOutputLabel)
         output.setAttribute('name', outputVar)
         output.setAttribute('typeRef', "integer")
         decisionTable.appendChild(output) // output
