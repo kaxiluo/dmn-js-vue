@@ -29,6 +29,8 @@ class DmnXmlTemplate {
 
     static DefaultOutputLabel = '得分'
 
+    static DefaultOutputType = 'number'
+
     static getXml(oldXml, attributes) {
         if (attributes.length === 0) {
             return DmnXml.getEmptyXml()
@@ -151,7 +153,7 @@ class DmnXmlTemplate {
         output.setAttribute('id', "Output_" + code)
         output.setAttribute('label', this.DefaultOutputLabel)
         output.setAttribute('name', outputVar)
-        output.setAttribute('typeRef', "integer")
+        output.setAttribute('typeRef', this.DefaultOutputType)
         decisionTable.appendChild(output) // output
 
         xmlDoc.documentElement.appendChild(decision)
@@ -169,7 +171,7 @@ class DmnXmlTemplate {
         let variable = xmlDoc.createElement('variable')
         variable.setAttribute('id', "InformationItem_" + random)
         variable.setAttribute('name', outputVar)
-        variable.setAttribute('typeRef', "integer")
+        variable.setAttribute('typeRef', this.DefaultOutputType)
         decision.appendChild(variable)
 
         let outputVars = []
