@@ -328,28 +328,28 @@ DmnXml.formulas = [
     {
         id: 1,
         name: '错1次扣n分',
-        allowAttrbuteCodeTypes: ["int", "integer"],
+        allowAttributeCodeTypes: ["int", "integer"],
         operate: 'sub',
         inputs: [{ type: "double", code: "n", value: null }]
     },
     {
         id: 2,
         name: '有该情况扣n分',
-        allowAttrbuteCodeTypes: ["bool", "boolean"],
+        allowAttributeCodeTypes: ["bool", "boolean"],
         operate: 'sub',
         inputs: [{ type: "double", code: "n", value: null }]
     },
     {
         id: 3,
         name: '对m次加n分',
-        allowAttrbuteCodeTypes: ["int", "integer"],
+        allowAttributeCodeTypes: ["int", "integer"],
         operate: 'add',
         inputs: [{ type: "int", code: "m", value: 1 }, { type: "double", code: "n", value: 3 }]
     },
     {
         id: 4,
         name: 'A不扣分，B扣m分，C扣n分，D扣x分',
-        allowAttrbuteCodeTypes: ["string", "text"],
+        allowAttributeCodeTypes: ["string", "text"],
         operate: 'sub',
         inputs: [{ type: "double", code: "m", value: 5 }, { type: "double", code: "n", value: 10 }, { type: "double", code: "x", value: 15 }]
     }
@@ -362,6 +362,7 @@ DmnXml.getXmlByFormula = function (oldXml, attributeCode, formulaItem, inputs) {
 class DmnXmlFormula {
     static getXml(oldXml, attributeCode, formulaItem, inputs) {
         // TODO
+        console.log('DmnXmlFormula.getXml', attributeCode, formulaItem, inputs);
         return oldXml
     }
 }

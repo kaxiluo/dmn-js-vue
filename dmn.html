@@ -39,7 +39,7 @@
                     <el-row>
                         <el-col :span="6">
                             <el-select v-model="formulaApplyItem.attributeCode" clearable filterable style="width:100%"
-                                @change="formulaAttrbuteChange">
+                                @change="formulaAttributeChange">
                                 <el-option v-for="item in selectedAttributes" :key="item.code" :label="item.name"
                                     :value="item.code">
                                 </el-option>
@@ -151,7 +151,7 @@
                     if (this.formulaApplyItem.attributeCode) {
                         let codeType = this.allAttributes[this.formulaApplyItem.attributeCode].type
                         return this.allFormulas.filter(function (item) {
-                            return item.allowAttrbuteCodeTypes.indexOf(codeType) !== -1
+                            return item.allowAttributeCodeTypes.indexOf(codeType) !== -1
                         })
                     }
                     return []
@@ -243,7 +243,7 @@
                     }
                 },
                 // 选择应用公式的属性改变
-                formulaAttrbuteChange() {
+                formulaAttributeChange() {
                     this.formulaApplyItem.formulaId = ''
                     this.formulaApplyItem.inputs = []
                 },
@@ -265,15 +265,12 @@
                         }
                     }
 
-                    console.log(this.formulaApplyItem)
-
                     let newXml = DmnXml.getXmlByFormula(
                         this.item.dmnXML,
                         this.formulaApplyItem.attributeCode,
                         this.formulaMap[this.formulaApplyItem.formulaId],
                         this.formulaApplyItem.inputs
                     )
-                    console.log(newXml)
                 }
             }
         };
