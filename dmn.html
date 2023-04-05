@@ -37,7 +37,7 @@
                 </el-form-item>
                 <el-form-item label="一键设置">
                     <el-row>
-                        <el-col :span="8">
+                        <el-col :span="6">
                             <el-select v-model="formulaApplyItem.attributeCode" clearable filterable style="width:100%"
                                 @change="formulaAttrbuteChange">
                                 <el-option v-for="item in selectedAttributes" :key="item.code" :label="item.name"
@@ -53,11 +53,11 @@
                                 </el-option>
                             </el-select>
                         </el-col>
-                        <el-col :span="4">
-                            <el-input :inline="true" type="text" v-for="(v,index) in formulaApplyItem.inputs"
+                        <el-col :span="8">
+                            <el-input type="text" v-for="(v,index) in formulaApplyItem.inputs" style="width: 60px;margin-left: 6px;"
                                 v-model="v.value" :placeholder="v.code"></el-input>
                         </el-col>        
-                        <el-col :span="4">
+                        <el-col :span="2">
                             <el-button type="primary" @click="formulaApplyClick" class="pull-right">应 用</el-button>
                         </el-col>
                     </el-row>
@@ -259,7 +259,7 @@
                         return
                     }
                     for (let k in this.formulaApplyItem.inputs) {
-                        if (this.formulaApplyItem.inputs[k].value === null) {
+                        if (this.formulaApplyItem.inputs[k].value === null || this.formulaApplyItem.inputs[k].value === '') {
                             alert("请填写完整")
                             return
                         }
