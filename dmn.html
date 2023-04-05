@@ -35,6 +35,33 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="一键设置">
+                    <el-row>
+                        <el-col :span="8">
+                            <el-select v-model="formulaApplyItem.attributeCode" clearable filterable style="width:100%"
+                                @change="formulaAttrbuteChange">
+                                <el-option v-for="item in selectedAttributes" :key="item.code" :label="item.name"
+                                    :value="item.code">
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-select v-model="formulaApplyItem.formulaId" clearable filterable style="width:100%"
+                                @change="formulaChange">
+                                <el-option v-for="item in ableFormulas" :key="item.id" :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                        <el-col :span="4">
+                            <el-input :inline="true" type="text" v-for="(v,index) in formulaApplyItem.inputs"
+                                v-model="v.value" :placeholder="v.code"></el-input>
+                        </el-col>        
+                        <el-col :span="4">
+                            <el-button type="primary" @click="formulaApplyClick" class="pull-right">应 用</el-button>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
                 <el-form-item label="DMN">
                     <div>
                         <el-tabs tab-position="top" v-model="dmnEditorName" @tab-click="dmnEditorTabClick">
@@ -92,6 +119,13 @@
                     },
                     dmnEditorTabs: [],
                     dmnEditorName: "0",
+                    // 辅助 一键设置公式列表
+                    allFormulas: DmnXml.formulas,
+                    formulaApplyItem: {
+                        attributeCode: '',
+                        formulaId: '',
+                        inputs: []
+                    }
                 };
             },
             computed: {
@@ -105,6 +139,23 @@
                     }
                     return data;
                 },
+                formulaMap: function () {
+                    let map = {}
+                    for (let k in this.allFormulas) {
+                        map[this.allFormulas[k].id] = this.allFormulas[k]
+                    }
+                    return map
+                },
+                // 可选公式
+                ableFormulas: function () {
+                    if (this.formulaApplyItem.attributeCode) {
+                        let codeType = this.allAttributes[this.formulaApplyItem.attributeCode].type
+                        return this.allFormulas.filter(function (item) {
+                            return item.allowAttrbuteCodeTypes.indexOf(codeType) !== -1
+                        })
+                    }
+                    return []
+                }
             },
             mounted: function () {
                 let _this = this
@@ -190,6 +241,39 @@
                     } catch (err) {
                         console.error('error opening tab', err);
                     }
+                },
+                // 选择应用公式的属性改变
+                formulaAttrbuteChange() {
+                    this.formulaApplyItem.formulaId = ''
+                    this.formulaApplyItem.inputs = []
+                },
+                // 选择的公式改变
+                formulaChange() {
+                    let formula = this.formulaMap[this.formulaApplyItem.formulaId]
+                    this.formulaApplyItem.inputs = formula.inputs
+                },
+                // 一键应用
+                formulaApplyClick() {
+                    if (!this.formulaApplyItem.attributeCode || !this.formulaApplyItem.formulaId) {
+                        alert("请选择属性或者公式")
+                        return
+                    }
+                    for (let k in this.formulaApplyItem.inputs) {
+                        if (this.formulaApplyItem.inputs[k].value === null) {
+                            alert("请填写完整")
+                            return
+                        }
+                    }
+
+                    console.log(this.formulaApplyItem)
+
+                    let newXml = DmnXml.getXmlByFormula(
+                        this.item.dmnXML,
+                        this.formulaApplyItem.attributeCode,
+                        this.formulaMap[this.formulaApplyItem.formulaId],
+                        this.formulaApplyItem.inputs
+                    )
+                    console.log(newXml)
                 }
             }
         };
