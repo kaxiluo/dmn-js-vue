@@ -54,9 +54,10 @@
                             </el-select>
                         </el-col>
                         <el-col :span="8">
-                            <el-input type="text" v-for="(v,index) in formulaApplyItem.inputs" style="width: 60px;margin-left: 6px;"
-                                v-model="v.value" :placeholder="v.code"></el-input>
-                        </el-col>        
+                            <el-input type="text" v-for="(v,index) in formulaApplyItem.inputs"
+                                style="width: 60px;margin-left: 6px;" v-model="v.value"
+                                :placeholder="v.code"></el-input>
+                        </el-col>
                         <el-col :span="2">
                             <el-button type="primary" @click="formulaApplyClick" class="pull-right">应 用</el-button>
                         </el-col>
@@ -271,6 +272,8 @@
                         this.formulaMap[this.formulaApplyItem.formulaId],
                         this.formulaApplyItem.inputs
                     )
+                    this.item.dmnXML = newXml
+                    this.openDmnDiagram(newXml)
                 }
             }
         };
