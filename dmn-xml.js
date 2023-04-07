@@ -373,6 +373,14 @@ DmnXml.formulas = [
         inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
         rules: [{ condition: ">{m}", output: "-{n}" }, { condition: "<={m}", output: "0" }]
     },
+    {
+        id: 7,
+        name: '完成率每低%1扣n分',
+        allowAttributeCodeTypes: ["double", "number", "float"],
+        operate: 'sub',
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: "<1", output: "-(1-code)*100*{n}" }, { condition: ">=1", output: "0" }]
+    }
 ]
 
 DmnXml.getXmlByFormula = function (oldXml, attributeCode, formulaItem, inputs) {
