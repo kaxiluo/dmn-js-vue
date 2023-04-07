@@ -335,6 +335,14 @@ DmnXml.formulas = [
     },
     {
         id: 2,
+        name: '对1次加n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'add',
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: ">0", output: "code * {n}" }, { condition: "<=0", output: "0" }]
+    },
+    {
+        id: 3,
         name: '有该情况扣n分',
         allowAttributeCodeTypes: ["bool", "boolean"],
         operate: 'sub',
@@ -342,13 +350,29 @@ DmnXml.formulas = [
         rules: [{ condition: "true", output: "-{n}" }, { condition: "false", output: "0" }]
     },
     {
-        id: 3,
+        id: 4,
+        name: '有该情况加n分',
+        allowAttributeCodeTypes: ["bool", "boolean"],
+        operate: 'add',
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: "true", output: "{n}" }, { condition: "false", output: "0" }]
+    },
+    {
+        id: 5,
         name: 'A不扣分，B扣m分，C扣n分，D扣x分',
         allowAttributeCodeTypes: ["string", "text"],
         operate: 'sub',
         inputs: [{ type: "double", code: "m", value: 5 }, { type: "double", code: "n", value: 10 }, { type: "double", code: "x", value: 15 }],
         rules: [{ condition: '"A"', output: "0" }, { condition: '"B"', output: "-{m}" }, { condition: '"C"', output: "-{n}" }, { condition: '"D"', output: "-{x}" }]
-    }
+    },
+    {
+        id: 6,
+        name: '超过m次扣n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: ">{m}", output: "-{n}" }, { condition: "<={m}", output: "0" }]
+    },
 ]
 
 DmnXml.getXmlByFormula = function (oldXml, attributeCode, formulaItem, inputs) {
@@ -364,9 +388,9 @@ class DmnXmlFormula {
             return oldXml
         }
 
-        let rules = this._rulesParsed(formulaItem.rules, attributeCode, inputs)
+        let parsedRules = this._rulesParsed(formulaItem.rules, attributeCode, inputs)
 
-        this._createRules(xmlDoc, decisionNode, rules)
+        this._createRules(xmlDoc, decisionNode, parsedRules)
 
         let newXml = xmlDomToString(xmlDoc)
         return newXml.replace(/xmlns=""/g, '')
@@ -386,24 +410,37 @@ class DmnXmlFormula {
 
     // 根据inputs,对预定义的变量赋值
     static _rulesParsed(rules, attributeCode, inputs) {
+        let parsedRules = []
         for (let k in rules) {
             let output = rules[k].output
+            let condition = rules[k].condition
             for (let kk in inputs) {
+                condition = condition.replaceAll('{' + inputs[kk].code + '}', inputs[kk].value)
                 output = output.replaceAll('{' + inputs[kk].code + '}', inputs[kk].value)
             }
             output = output.replaceAll('code', attributeCode)
-            rules[k].output = output
+
+            parsedRules.push({
+                condition: condition,
+                output: output
+            })
         }
-        return rules
+        return parsedRules
     }
 
     // 写入规则 只支持一个decision对应一个input
-    static _createRules(xmlDoc, decisionNode, rules) {
+    static _createRules(xmlDoc, decisionNode, parsedRules) {
         let random = Math.random().toString(36).slice(2)
 
         let decisionTable = decisionNode.getElementsByTagName('decisionTable').item(0)
-        // todo 移除ruleNode
-        for (let k in rules) {
+
+        // 移除存在的rule节点
+        let oldRules = decisionTable.getElementsByTagName('rule')
+        while (oldRules.length) {
+            oldRules.item(0).remove()
+        }
+
+        for (let k in parsedRules) {
             let idSuffix = random + k
 
             let ruleNode = xmlDoc.createElement('rule')
@@ -412,14 +449,14 @@ class DmnXmlFormula {
             let inputEntry = xmlDoc.createElement('inputEntry')
             inputEntry.setAttribute('id', "UnaryTests_" + idSuffix)
             let inputText = xmlDoc.createElement('text')
-            inputText.appendChild(xmlDoc.createTextNode(rules[k].condition))
+            inputText.appendChild(xmlDoc.createTextNode(parsedRules[k].condition))
             inputEntry.appendChild(inputText) // text
             ruleNode.appendChild(inputEntry)
             // outputEntry
             let outputEntry = xmlDoc.createElement('outputEntry')
             outputEntry.setAttribute('id', "LiteralExpression_" + idSuffix)
             let outputText = xmlDoc.createElement('text')
-            outputText.appendChild(xmlDoc.createTextNode(rules[k].output))
+            outputText.appendChild(xmlDoc.createTextNode(parsedRules[k].output))
             outputEntry.appendChild(outputText) // text
             ruleNode.appendChild(outputEntry)
             // append
