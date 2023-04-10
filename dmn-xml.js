@@ -325,24 +325,34 @@ function xmlDomToString(xmlObj) {
 
 // 辅助公式
 DmnXml.formulas = [
+    // case 1: 每次n分
     {
         id: 1,
-        name: '错1次扣n分',
+        name: '每次扣n分',
         allowAttributeCodeTypes: ["int", "integer"],
         operate: 'sub',
         inputs: [{ type: "double", code: "n", value: null }],
         rules: [{ condition: ">0", output: "-code * {n}" }, { condition: "<=0", output: "0" }]
     },
     {
-        id: 2,
-        name: '对1次加n分',
+        id: 1.1,
+        name: '每次加n分',
         allowAttributeCodeTypes: ["int", "integer"],
         operate: 'add',
         inputs: [{ type: "double", code: "n", value: null }],
         rules: [{ condition: ">0", output: "code * {n}" }, { condition: "<=0", output: "0" }]
     },
     {
-        id: 3,
+        id: 1.2,
+        name: '每次扣该项基础分%n',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: ">0", output: "-code*{n}*0.01*base_score" }, { condition: "<=0", output: "0" }]
+    },
+    // case 2: bool
+    {
+        id: 2,
         name: '有该情况扣n分',
         allowAttributeCodeTypes: ["bool", "boolean"],
         operate: 'sub',
@@ -350,7 +360,7 @@ DmnXml.formulas = [
         rules: [{ condition: "true", output: "-{n}" }, { condition: "false", output: "0" }]
     },
     {
-        id: 4,
+        id: 2.1,
         name: '有该情况加n分',
         allowAttributeCodeTypes: ["bool", "boolean"],
         operate: 'add',
@@ -358,15 +368,48 @@ DmnXml.formulas = [
         rules: [{ condition: "true", output: "{n}" }, { condition: "false", output: "0" }]
     },
     {
-        id: 5,
-        name: 'A不扣分，B扣m分，C扣n分，D扣x分',
-        allowAttributeCodeTypes: ["string", "text"],
+        id: 2.2,
+        name: '没有该情况扣n分',
+        allowAttributeCodeTypes: ["bool", "boolean"],
         operate: 'sub',
-        inputs: [{ type: "double", code: "m", value: 5 }, { type: "double", code: "n", value: 10 }, { type: "double", code: "x", value: 15 }],
-        rules: [{ condition: '"A"', output: "0" }, { condition: '"B"', output: "-{m}" }, { condition: '"C"', output: "-{n}" }, { condition: '"D"', output: "-{x}" }]
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: "false", output: "-{n}" }, { condition: "true", output: "0" }]
     },
     {
-        id: 6,
+        id: 2.3,
+        name: '没有该情况加n分',
+        allowAttributeCodeTypes: ["bool", "boolean"],
+        operate: 'add',
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: "false", output: "{n}" }, { condition: "true", output: "0" }]
+    },
+    {
+        id: 2.4,
+        name: '有该情况扣该项基础分%n',
+        allowAttributeCodeTypes: ["bool", "boolean"],
+        operate: 'sub',
+        inputs: [{ type: "double", code: "n", value: 100 }],
+        rules: [{ condition: "true", output: "-{n}*0.01*base_score" }, { condition: "false", output: "0" }]
+    },
+    {
+        id: 2.5,
+        name: '没有该情况扣该项基础分%n',
+        allowAttributeCodeTypes: ["bool", "boolean"],
+        operate: 'sub',
+        inputs: [{ type: "double", code: "n", value: 100 }],
+        rules: [{ condition: "false", output: "-{n}*0.01*base_score" }, { condition: "true", output: "0" }]
+    },
+    // case 3: m次 n分
+    {
+        id: 3,
+        name: '低于m次扣n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: "<{m}", output: "-{n}" }, { condition: ">={m}", output: "0" }]
+    },
+    {
+        id: 3.1,
         name: '超过m次扣n分',
         allowAttributeCodeTypes: ["int", "integer"],
         operate: 'sub',
@@ -374,12 +417,86 @@ DmnXml.formulas = [
         rules: [{ condition: ">{m}", output: "-{n}" }, { condition: "<={m}", output: "0" }]
     },
     {
-        id: 7,
+        id: 3.2,
+        name: '超过m次加n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'add',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: ">{m}", output: "{n}" }, { condition: "<={m}", output: "0" }]
+    },
+    {
+        id: 3.3,
+        name: '低于m次，低的部分每次扣n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: "<{m}", output: "(code-{m})*{n}" }, { condition: ">={m}", output: "0" }]
+    },
+    {
+        id: 3.4,
+        name: '超过m次，超过部分每次加n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'add',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: ">{m}", output: "(code-{m})*{n}" }, { condition: "<={m}", output: "0" }]
+    },
+    {
+        id: 3.5,
+        name: '超过m次，超过部分每次扣n分',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: ">{m}", output: "({m}-code)*{n}" }, { condition: "<={m}", output: "0" }]
+    },
+    {
+        id: 3.6,
+        name: '低于m次 扣该项基础分%n',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: "<{m}", output: "-{n}*0.01*base_score" }, { condition: ">={m}", output: "0" }]
+    },
+    {
+        id: 3.7,
+        name: '超过m次 扣该项基础分%n',
+        allowAttributeCodeTypes: ["int", "integer"],
+        operate: 'sub',
+        inputs: [{ type: "int", code: "m", value: null }, { type: "double", code: "n", value: null }],
+        rules: [{ condition: ">{m}", output: "-{n}*0.01*base_score" }, { condition: "<={m}", output: "0" }]
+    },
+    // case 4：完成率
+    {
+        id: 4,
         name: '完成率每低%1扣n分',
         allowAttributeCodeTypes: ["double", "number", "float"],
         operate: 'sub',
         inputs: [{ type: "double", code: "n", value: null }],
         rules: [{ condition: "<1", output: "-(1-code)*100*{n}" }, { condition: ">=1", output: "0" }]
+    },
+    {
+        id: 4.1,
+        name: '完成率每低%1扣该项基础分%n',
+        allowAttributeCodeTypes: ["double", "number", "float"],
+        operate: 'sub',
+        inputs: [{ type: "double", code: "n", value: null }],
+        rules: [{ condition: "<1", output: "-(1-code)*100*{n}*0.01*base_score" }, { condition: ">=1", output: "0" }]
+    },
+    // case 5: 主观评分
+    {
+        id: 5,
+        name: 'A不扣分，B扣m分，C扣n分，D扣i分',
+        allowAttributeCodeTypes: ["string", "text"],
+        operate: 'sub',
+        inputs: [{ type: "double", code: "m", value: 5 }, { type: "double", code: "n", value: 10 }, { type: "double", code: "i", value: 15 }],
+        rules: [{ condition: '"A"', output: "0" }, { condition: '"B"', output: "-{m}" }, { condition: '"C"', output: "-{n}" }, { condition: '"D"', output: "-{i}" }]
+    },
+    {
+        id: 5.1,
+        name: '主观评分',
+        allowAttributeCodeTypes: ["int", "integer", "double", "number", "float"],
+        operate: 'sub',
+        inputs: [],
+        rules: [{ condition: '', output: "code-base_score" }]
     }
 ]
 
