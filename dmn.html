@@ -271,6 +271,24 @@
                             alert("请填写完整")
                             return
                         }
+                        let v = this.formulaApplyItem.inputs[k].value
+                        switch (this.formulaApplyItem.inputs[k].type) {
+                            case 'int':
+                            case'integer':
+                                if (!Number.isInteger(Number(v))) {
+                                    alert("请填写整数" + this.formulaApplyItem.inputs[k].code)
+                                    return
+                                }
+                                break
+                            case 'double':
+                            case 'float':
+                            case 'number':
+                                if ((!isNaN(parseFloat(v)) && isFinite(v)) === false) {
+                                    alert("请填写数字" + this.formulaApplyItem.inputs[k].code)
+                                    return
+                                }
+                                break
+                        }
                     }
 
                     let newXml = DmnXml.getXmlByFormula(
